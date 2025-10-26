@@ -26,5 +26,7 @@ steps:
 options: 
   logging: CLOUD_LOGGING_ONLY
 
-ARG VITE_API_URL=https://recipe-backend-896842402227.us-central1.run.app/
-ENV VITE_API_URL=${VITE_API_URL}
+run npm install:
+  ARG VITE_API_URL
+  ENV VITE_API_URL=$VITE_API_URL
+  RUN npm install
