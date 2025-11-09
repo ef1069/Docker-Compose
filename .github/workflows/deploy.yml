@@ -25,25 +25,21 @@ jobs:
     
     - name: Install backend dependencies
       run: |
-        set -xeuo pipefail
         cd backend
         npm ci
     
     - name: Install frontend dependencies
       run: |
-        set -xeuo pipefail
         cd frontend
         npm ci
     
     - name: Run backend tests
       run: |
-        set -xeuo pipefail
         cd backend
         npm test
     
     - name: Run frontend tests
       run: |
-        set -xeuo pipefail
         cd frontend
         npm test
     
@@ -68,7 +64,6 @@ jobs:
     - name: Build and push backend image
       if: success()
       run: |
-        set -xeuo pipefail
         cd backend
         docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/recipe-backend:${{ github.sha }} .
         docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/recipe-backend:${{ github.sha }}
@@ -76,17 +71,15 @@ jobs:
     - name: Build and push frontend image
       if: success()
       run: |
-        set -xeuo pipefail
-        cd backend
+        cd frontend
         # Get the backend URL for the frontend build
-        BACKEND_URL=$(gcloud run services describe recipe-backend --region=${{ secrets.GCP_REGION }} --format='value(status.url)' 2>/dev/null || echo "https://recipe-backend-placeholder.run.app") . ./env.sh
-        docker build --build-arg VITE_API_URL=$BACKEND_URL -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/recipe-frontend:${{ github.sha }} . ./env.sh
+        BACKEND_URL=$(gcloud run services describe recipe-backend --region=${{ secrets.GCP_REGION }} --format='value(status.url)' 2>/dev/null || echo "https://recipe-backend-placeholder.run.app") .
+        docker build --build-arg VITE_API_URL=$BACKEND_URL -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/recipe-frontend:${{ github.sha }} .
         docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/recipe-frontend:${{ github.sha }}
     
     - name: Deploy backend to Cloud Run
       if: success()
       run: |
-        set -xeuo pipefail
         gcloud run deploy recipe-backend \
           --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/recipe-backend:${{ github.sha }} \
           --region ${{ secrets.GCP_REGION }} \
@@ -99,7 +92,6 @@ jobs:
     - name: Deploy frontend to Cloud Run
       if: success()
       run: |
-        set -xeuo pipefail
         gcloud run deploy recipe-frontend \
           --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/recipe-frontend:${{ github.sha }} \
           --region ${{ secrets.GCP_REGION }} \
@@ -112,6 +104,5 @@ jobs:
     - name: Get deployed URLs
       if: success()
       run: |
-        set -xeuo pipefail
         echo "Backend URL: $(gcloud run services describe recipe-backend --region=${{ secrets.GCP_REGION }} --format='value(status.url)')"
         echo "Frontend URL: $(gcloud run services describe recipe-frontend --region=${{ secrets.GCP_REGION }} --format='value(status.url)')"
